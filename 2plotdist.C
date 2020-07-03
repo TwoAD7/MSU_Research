@@ -12,8 +12,7 @@ using namespace std;
 
 /*
 Roy Salinas 
-
-
+Used to plot different parameters from LISE++ calculation files.
 */
 
 
