@@ -30,7 +30,7 @@ pixel_locations = { "Mg_32":{"x":1121,"y":626},"Mg_33":{"x":1116,"y":626},\
 "Mg_34":{"x":1116,"y":626} ,"Mg_35":{"x":1116,"y":626},"Mg_36":{"x":1136,"y":626},\
 "Mg_37":{"x":1116,"y":626},"Mg_38":{"x":1116,"y":626},"Mg_40":{"x":1824,"y":626}}
 
-#array of maps
+#array of maps, data is the key to the map, replace the zero's with arrays of data
 isotope_info = [ \
 {"isotope":"Mg_32", "data":0.0}, \
 {"isotope":"Mg_33","data":0.0},  \
@@ -86,6 +86,8 @@ def start():
 	pag.click()
 	flag = True #to indicate it has been opened	
 
+
+#to set the beam
 def set_projectile(projectile_name,energy,intensity,A):
 	print("Setting projectile...")
 	pag.moveTo(16,124) #projectile button 
@@ -95,7 +97,7 @@ def set_projectile(projectile_name,energy,intensity,A):
 	pag.write(projectile_name)
 	pag.moveTo(231,211) # The mass number box
 	pag.doubleClick()
-	pag.write(A)
+	pag.write(str(A))
 	pag.moveTo(519,213) #energy
 	pag.doubleClick()
 	pag.write(str(energy))
@@ -105,6 +107,45 @@ def set_projectile(projectile_name,energy,intensity,A):
 	pag.moveTo(269,445)
 	pag.click()
 	time.sleep(1)
+
+def set_FP_slits(slit_width):
+	print("Setting FP_Slits...")
+	pag.moveTo(65,684) #move to slit button 
+	pag.click()
+	pag.moveTo(764,231)
+	pag.click()
+	pag.write(str(slit_width))
+	pag.moveTo(238,447)
+	pag.click()
+	pag.moveTo(71,744)
+	pag.click()
+
+def set_I2_wedge(wedge_thickness):
+	print("Setting I2_wedge...")
+	pc.copy("")
+	pag.moveTo(60,461) #move to wedge button 
+	pag.click()
+	pag.write(wedge_thickness)
+	pag.moveTo(926,223) #set spectrometer after block
+	pag.click()
+	pag.moveTo(397,398) #select wedge profile
+	pag.click()
+	pag.moveTo(881,394) #move to calculate angle 
+	pag.click()
+	time.sleep(10) #wait 
+	pag.moveTo(371,479) #fit achromatic angle from LISE calc.
+	pag.click()
+	pag.moveTo(308,530) #select the angle and copy 
+	pag.doubleClick()
+	pag.hotkey('ctrl','c')
+	angle = pc.paste()
+	pag.moveTo(168,622) #ok button 
+	pag.click()
+	pag.moveTo(152,535)
+	pag.click()
+	return angle
+
+
 
 def tune_spectrometer():
 	print("Tuning spectrometer...")
@@ -129,6 +170,8 @@ def set_fragment(fragment,A):
 	time.sleep(1)
 
 def get_thickness():
+	target_thickness = 0
+	pc.copy("") #clear clipboard
 	print("Retrieving thickness...")
 	pag.moveTo(453,38) #calculations 
 	pag.click()
@@ -148,10 +191,13 @@ def get_thickness():
 	pag.moveTo(24,196) #target button 
 	pag.click()
 	pag.moveTo(477,286) #box containing info 
+	time.sleep(1)
 	pag.doubleClick()
+	time.sleep(1)
 	pag.hotkey('ctrl' , 'c') #copy 
-	thickness = pc.paste() #paste it to a variable 
-	print(f"Thickness is {thickness} microns")
+	time.sleep(1)
+	target_thickness = pc.paste() #paste it to a variable 
+	print(f"Thickness is {target_thickness} microns")
 	"""
 	for i,m in enumerate(isotope_info):
 		if isotope_info[i]["isotope"] == isotope_select:
@@ -161,7 +207,7 @@ def get_thickness():
 	"""
 	pag.moveTo(456,459) #ok button to close
 	pag.click()
-	return thickness 
+	return target_thickness 
 
 def get_intensity(isotope,beam_element,beam_mass):
 	flag = False
@@ -178,7 +224,7 @@ def get_intensity(isotope,beam_element,beam_mass):
 	pag.click()
 	pag.moveTo(532,121) #drop down 
 	pag.click()
-	pag.press("d",presses=2,interval=1)
+	pag.press("d",presses=2,interval=1) #to save in desktop
 	pag.press("enter")
 	pag.moveTo(531,339) #file save text box
 	pag.click()
@@ -210,13 +256,71 @@ def get_intensity(isotope,beam_element,beam_mass):
 		"""
 		return _intensity[4],flag
 
+#retrieve the transmission in X-space 
+def FP_slit_X_transmission_percent():
+	#NEED TO WORK ON THIS
+	print("Getting FP_Slits X space transmission...")
+	df = pd.read_csv("C:\\Users\Owner\Desktop\junk.txt")
+	FP_x_space_transmission = df.iloc[39,0] #location in the .csv file
+	FP_x_space_transmission = FP_x_space_transmission.split()
+	#print(FP_x_space_transmission[4])
+	return FP_x_space_transmission[4] #percent value 
+
+def purity_percent(fragment_isotope):
+	print(f"Retrieving beam purity for {fragment_isotope}...")
+	pag.moveTo(832,83)
+	pag.click()
+	time.sleep(40)
+	pag.moveTo(999,77) #x spatial distribution 
+	pag.click()
+	pag.dragTo(1110, 629,.5) #FP_PIN detector
+	pag.click(interval=.5) 
+	time.sleep(4)
+	pag.moveTo(14,316) #stats box
+	pag.click()
+	pag.press("enter") #accept
+	pag.moveTo(1609,201) #file save
+	pag.click()
+	pag.moveTo(365,195) #drop down 
+	pag.click()
+	pag.press("d",presses=2,interval=1) #to save in desktop
+	pag.press("enter")
+	pag.moveTo(389,413) #file save text box
+	pag.click()
+	pag.write("pps_junk.txt")
+	pag.press("enter") #save file
+	pag.press("left")
+	pag.press("enter") #this "enter" saves the file to desktop
+	pag.moveTo(1682,122)
+	pag.click()
+	pag.moveTo(1877,13)
+	pag.click()
+	df = pd.read_csv("C:\\Users\Owner\Desktop\pps_junk.txt",error_bad_lines=False) #path to temporary file
+	print(f"Size of data frame is {df.size}.")
+	_string = df.iloc[5,0] #get the pps for isotope in question
+	_string = _string.split()
+	isotope_fragment = _string[13] #grab pps value
+	total = 0.
+	for i in range(5,df.size): 
+		string = df.iloc[i,0]
+		string = string.split()
+		val = float(float(string[13])) #to get it with the correct scientific notation
+		total = total + val
+	print(f"The total amount of pps is {total}.")
+	frag_val = float(float(isotope_fragment))
+	print(f"Percent of {fragment_isotope} in beam is {(int(float(frag_val))/total)*100.} %")
+	percent =(int(float(frag_val))/total)*100.
+	return percent
+
 
 def isotope_loop():
 	beam_data = []
 	#with open("LISE_data.txt")
 	start = time.time()
+	df = pd.DataFrame(None) #create our data frame
 	for i,dic in enumerate(isotope_info): #loop for fragments
-		df = pd.DataFrame(None)
+		df = df[0:0]
+		#df = pd.DataFrame(None) #create our data frame
 		df = pd.DataFrame(columns=["Beam element","A (u)","Beam energy (MeV/u)","Beam Intensity (pnA)","Target thickness (microns)","Fragment Intensity (pnA)"])
 		data = [] 
 		iso=dic['isotope'].replace("_"," ") #get rid of the underscore in the isotope name
@@ -246,6 +350,42 @@ def isotope_loop():
 		print(df)
 		df.to_csv(f"{iso[0]}_{iso[1]}_data_LISE++.csv")
 		print(f"File saved as: {iso[0]}_{iso[1]}_data_LISE++.csv")
+	end = time.time()
+	print(f"It took {end-start} to run everything.")
+
+def isotope_tuning_values():
+	df = pd.DataFrame(None) #create our data frame
+	df = pd.DataFrame(columns=["I_2 slit width","Intensity (pnA) ","Target thickness (microns) ","FP Slit width (H,V)","Purity transmission","Mom. Accpetance % ", "wedge thickness","wedge angle"])
+	#fragment_name  = input("Enter the symbol for fragment (i.e.Mg): ")
+	#fragment_A = input("Enter the atomic mass for fragment (i.e. 32): ")
+	FP_slit_width = input("Enter the width of the FP slits: ")
+	set_projectile("Ca",140,80,48)
+	start = time.time()
+	set_FP_slits(FP_slit_width)
+	for i,dic in enumerate(isotope_info): #loop for each fragment
+		iso=dic['isotope'].replace("_"," ") #get rid of the underscore in the isotope name
+		print(f"You are looking at the {iso} isotope.")  #returns the name of the isotope
+		iso = iso.split()
+		set_fragment(iso[0],iso[1])
+		wedge_thickness = 2300 #microns
+		for count in range(9): #loop over each wedge thickness
+			print(f"Currently using {wedge_thickness} microns for {iso[0]} {iso[1]}")
+			wedge_angle = set_I2_wedge(str(wedge_thickness))
+			tune_spectrometer()
+			target_thickness = get_thickness()
+			tune_spectrometer()
+			frag_intensity,flag = get_intensity(dic['isotope'],"Ca",48) #pass the isotope name to get intensity and save it to the map with the frag info
+			if flag == True:
+				continue
+			#FP_x_space_transmission = FP_slit_X_transmission_percent()
+			_purity_percent = purity_percent(iso[0] + iso[1])
+			print(f"Purity is {_purity_percent}")
+			df.loc[count] = [29.5,frag_intensity,target_thickness,FP_slit_width,_purity_percent,1,wedge_thickness,wedge_angle]
+			wedge_thickness=wedge_thickness+100
+			print(f"Have gone through {count} iterations")
+			print(df)
+		df.to_csv(f"{iso[0]}_{iso[1]}_finetune_{FP_slit_width}_data_LISE++.csv")
+		print(f"File saved as: {iso[0]}_{iso[1]}_finetune_data_LISE++.csv")
 	end = time.time()
 	print(f"It took {end-start} to run everything.")
 
