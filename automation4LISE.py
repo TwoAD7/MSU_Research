@@ -122,10 +122,9 @@ def set_FP_slits(slit_width):
 
 def set_I2_wedge(wedge_thickness):
 	print("Setting I2_wedge...")
-	pc.copy("")
 	pag.moveTo(60,461) #move to wedge button 
 	pag.click()
-	pag.write(wedge_thickness)
+	pag.write(str(wedge_thickness))
 	pag.moveTo(926,223) #set spectrometer after block
 	pag.click()
 	pag.moveTo(397,398) #select wedge profile
@@ -137,12 +136,15 @@ def set_I2_wedge(wedge_thickness):
 	pag.click()
 	pag.moveTo(308,530) #select the angle and copy 
 	pag.doubleClick()
+	pc.copy("")
+	time.sleep(2)
 	pag.hotkey('ctrl','c')
 	angle = pc.paste()
 	pag.moveTo(168,622) #ok button 
 	pag.click()
 	pag.moveTo(152,535)
 	pag.click()
+	print(f"The angle for the wedge is -{angle}.")
 	return angle
 
 
@@ -353,41 +355,106 @@ def isotope_loop():
 	end = time.time()
 	print(f"It took {end-start} to run everything.")
 
+
+
+#to "slice" a dictionary and return slided dictionary 
+def slice_array(arr,s):
+	new_array = []
+	index =0
+	for i,dic in enumerate(isotope_info):
+		temp_dic = isotope_info[i]
+		if temp_dic["isotope"] == str(s):
+			index =i
+			break
+	for t in range(index,len(arr)):
+		new_array.append(isotope_info[t])
+	return new_array
+
+#slide an array with dictionaries in it
 def isotope_tuning_values():
-	df = pd.DataFrame(None) #create our data frame
-	df = pd.DataFrame(columns=["I_2 slit width","Intensity (pnA) ","Target thickness (microns) ","FP Slit width (H,V)","Purity transmission","Mom. Accpetance % ", "wedge thickness","wedge angle"])
+	#df = pd.DataFrame(None) #create our data frame
+	#df = pd.DataFrame(columns=["I_2 slit width","Intensity (pnA) ","Target thickness (microns) ","FP Slit width (H,V)","Purity transmission","Mom. Accpetance % ", "wedge thickness","wedge angle"])
 	#fragment_name  = input("Enter the symbol for fragment (i.e.Mg): ")
 	#fragment_A = input("Enter the atomic mass for fragment (i.e. 32): ")
+	bool_value = False
+	ans = input("Do you want to start from a particular isotope? (yes or no): ")
+	if ans == "yes":
+		bool_value = True
+	isotope_start= input("Which isotope would you like to start with? (Enter as 'Mg_32' for example.): ")
 	FP_slit_width = input("Enter the width of the FP slits: ")
 	set_projectile("Ca",140,80,48)
 	start = time.time()
 	set_FP_slits(FP_slit_width)
-	for i,dic in enumerate(isotope_info): #loop for each fragment
-		iso=dic['isotope'].replace("_"," ") #get rid of the underscore in the isotope name
-		print(f"You are looking at the {iso} isotope.")  #returns the name of the isotope
-		iso = iso.split()
-		set_fragment(iso[0],iso[1])
-		wedge_thickness = 2300 #microns
-		for count in range(9): #loop over each wedge thickness
-			print(f"Currently using {wedge_thickness} microns for {iso[0]} {iso[1]}")
-			wedge_angle = set_I2_wedge(str(wedge_thickness))
-			tune_spectrometer()
-			target_thickness = get_thickness()
-			tune_spectrometer()
-			frag_intensity,flag = get_intensity(dic['isotope'],"Ca",48) #pass the isotope name to get intensity and save it to the map with the frag info
-			if flag == True:
-				continue
-			#FP_x_space_transmission = FP_slit_X_transmission_percent()
-			_purity_percent = purity_percent(iso[0] + iso[1])
-			print(f"Purity is {_purity_percent}")
-			df.loc[count] = [29.5,frag_intensity,target_thickness,FP_slit_width,_purity_percent,1,wedge_thickness,wedge_angle]
-			wedge_thickness=wedge_thickness+100
-			print(f"Have gone through {count} iterations")
-			print(df)
-		df.to_csv(f"{iso[0]}_{iso[1]}_finetune_{FP_slit_width}_data_LISE++.csv")
-		print(f"File saved as: {iso[0]}_{iso[1]}_finetune_data_LISE++.csv")
+	if bool_value == True:
+		print(f"Beginning with {isotope_start}...")
+		new_isotope_dic = slice_array(isotope_info,isotope_start)
+		for i,dic in enumerate(new_isotope_dic): #loop for each fragment
+			#if dic["isotope"] == isotope_start:
+			df = pd.DataFrame(None) #create our data frame
+			df = pd.DataFrame(columns=["I_2 slit width","Intensity (pnA) ","Target thickness (microns) ","FP Slit width (H,V)","Purity transmission","Mom. Accpetance % ", "wedge thickness","wedge angle"])
+			iso=dic['isotope'].replace("_"," ") #get rid of the underscore in the isotope name
+			print(f"You are looking at the {iso} isotope.")  #returns the name of the isotope
+			iso = iso.split()
+			set_fragment(iso[0],iso[1])
+			wedge_thickness = 2300 #wedge thickness to start with 
+			for count in range(9): #loop over each wedge thickness
+				print(f"Currently using {wedge_thickness} microns for {iso[0]} {iso[1]}")
+				preliminary_wedge_angle = set_I2_wedge(str(wedge_thickness))	# There is a dependence between target and wedge. Doing it twice gives best results 
+				tune_spectrometer()
+				preliminary_target_thickness = get_thickness()
+				tune_spectrometer()
+				wedge_angle = set_I2_wedge(str(wedge_thickness))					
+				tune_spectrometer()
+				target_thickness = get_thickness()
+				tune_spectrometer()
+				frag_intensity,flag = get_intensity(dic['isotope'],"Ca",48) #pass the isotope name to get intensity and save it to the map with the frag info
+				if flag == True:
+					continue
+				#FP_x_space_transmission = FP_slit_X_transmission_percent()
+				_purity_percent = purity_percent(iso[0] + iso[1]) #pass in the name of the fragment isotope
+				print(f"Purity is {_purity_percent}")
+				df.loc[count] = [29.5,frag_intensity,target_thickness,FP_slit_width,_purity_percent,1,wedge_thickness,wedge_angle]
+				wedge_thickness=wedge_thickness+100
+				print(f"Have gone through {count} iterations")
+				print(df)
+			df.to_csv(f"{iso[0]}_{iso[1]}_finetune_{FP_slit_width}_data_LISE++.csv")
+			print(f"File saved as: {iso[0]}_{iso[1]}_finetune_data_LISE++.csv")
+			del df 
+	else:
+		print("Looping through everything...")
+		for i,dic in enumerate(isotope_info): #loop for each fragment
+			df = pd.DataFrame(None) #create our data frame
+			df = pd.DataFrame(columns=["I_2 slit width","Intensity (pnA) ","Target thickness (microns) ","FP Slit width (H,V)","Purity transmission","Mom. Accpetance % ", "wedge thickness","wedge angle"])
+			iso=dic['isotope'].replace("_"," ") #get rid of the underscore in the isotope name
+			print(f"You are looking at the {iso} isotope.")  #returns the name of the isotope
+			iso = iso.split()
+			set_fragment(iso[0],iso[1])
+			wedge_thickness = 2300 #wedge thickness to start with 
+			for count in range(9): #loop over each wedge thickness
+				print(f"Currently using {wedge_thickness} microns for {iso[0]} {iso[1]}")
+				preliminary_wedge_angle = set_I2_wedge(str(wedge_thickness))	# There is a dependence between target and wedge. Doing it twice gives best results 
+				tune_spectrometer()
+				preliminary_target_thickness = get_thickness()
+				tune_spectrometer()
+				wedge_angle = set_I2_wedge(str(wedge_thickness))					
+				tune_spectrometer()
+				target_thickness = get_thickness()
+				tune_spectrometer()
+				frag_intensity,flag = get_intensity(dic['isotope'],"Ca",48) #pass the isotope name to get intensity and save it to the map with the frag info
+				if flag == True:
+					continue
+				#FP_x_space_transmission = FP_slit_X_transmission_percent()
+				_purity_percent = purity_percent(iso[0] + iso[1]) #pass in the name of the fragment isotope
+				print(f"Purity is {_purity_percent}")
+				df.loc[count] = [29.5,frag_intensity,target_thickness,FP_slit_width,_purity_percent,1,wedge_thickness,wedge_angle]
+				wedge_thickness=wedge_thickness+100
+				print(f"Have gone through {count} iterations")
+				print(df)
+			df.to_csv(f"{iso[0]}_{iso[1]}_finetune_{FP_slit_width}_data_LISE++.csv")
+			print(f"File saved as: {iso[0]}_{iso[1]}_finetune_data_LISE++.csv")
+			del df 
 	end = time.time()
-	print(f"It took {end-start} to run everything.")
+	print(f"It took {(end-start)/60.0} minutes to run everything.")
 
 def save():
 	with open("thickness.txt","w") as file:
