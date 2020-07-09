@@ -8,6 +8,24 @@ import pandas as pd
 #import numpy as np
 import csv
 import xlrd 
+import os 
+
+"""
+Roy Salinas
+Module to control automation in LISE++ with NSCL configuration
+
+Purpose: To retrive particular parameters from LISE++ such as beam intensity,
+beam purity, wedge thickness, and wedge angle, momentum acceptance, focal
+plane slit width, and Image 2 slit width. 
+
+All beam data comes from NSCL website: https://nscl.msu.edu/users/beams.html
+
+Python version: 3.7.1
+"""
+
+#path = os.path.expanduser("~\Desktop")
+#print(path)
+
 
 pag.PAUSE=1
 pag.FAILSAFE=True
@@ -65,15 +83,28 @@ beam_info = {"O_16": {"Energy":150,"Intensity":175}, "O_18":{"Energy":120,"Inten
 
 
 def start():
-	x,y=pag.center(pag.locateOnScreen("LISE++.png")) #find the app based on a picture, then
-	pag.moveTo(x,y)									 #return coordinates for the cetner 
+	flag = False
+	ans = input("Do you want to start from a particular isotope? (yes or no): ")
+	if ans == "yes" or ans =="YES" or ans == "Yes":
+		flag = True
+		isotope_start= input("Which isotope would you like to start with? (Enter as 'Mg_32' for example.): ")
+		print(f"Looping through {isotope_start} to Mg 40...")
+	else:
+		print("Looping through all isotopes (Mg 32 - Mg 40)...")
+	FP_slit_width = input("Enter the width of the FP slits: ")
+	try:			
+		x,y=pag.center(pag.locateOnScreen("LISE++.png"))# find the image of the LISE++ icon,return coordinates for the cetner 
+		pag.moveTo(x,y)		
+	except TypeError:
+		x,y=pag.center(pag.locateOnScreen("LISE++_2.png"))	#if the app. has been clicked before 
+		pag.moveTo(x,y)				
 	pag.doubleClick()								
 	time.sleep(2.5)
 	pag.moveTo(18,44) #file
 	pag.doubleClick()
 	pag.dragTo(112, 257,.5) #configuration
 	pag.click(interval=.5) 
-	pag.moveTo(398,251) #load
+	pag.moveTo(588,251) #load
 	pag.click(interval=.5)
 	pag.moveTo(154,326) #textbox
 	pag.click()
@@ -84,7 +115,8 @@ def start():
 	pag.click()
 	pag.moveTo(471,323) #Open button
 	pag.click()
-	flag = True #to indicate it has been opened	
+	return flag,FP_slit_width,isotope_start
+
 
 
 #to set the beam
@@ -127,6 +159,7 @@ def set_I2_wedge(wedge_thickness):
 	pag.write(str(wedge_thickness))
 	pag.moveTo(926,223) #set spectrometer after block
 	pag.click()
+	time.sleep(2)
 	pag.moveTo(397,398) #select wedge profile
 	pag.click()
 	pag.moveTo(881,394) #move to calculate angle 
@@ -145,7 +178,7 @@ def set_I2_wedge(wedge_thickness):
 	pag.moveTo(152,535)
 	pag.click()
 	print(f"The angle for the wedge is -{angle}.")
-	return angle
+	return str(angle)
 
 
 
@@ -183,7 +216,7 @@ def get_thickness():
 	pag.click()
 	pag.moveTo(326,655) # second ok 
 	pag.click()
-	time.sleep(15)
+	time.sleep(20)
 	pag.moveTo(260,451) #load thickness
 	pag.click()
 	pag.moveTo(1629,160) #exit first plot
@@ -226,7 +259,8 @@ def get_intensity(isotope,beam_element,beam_mass):
 	pag.click()
 	pag.moveTo(532,121) #drop down 
 	pag.click()
-	pag.press("d",presses=2,interval=1) #to save in desktop
+	#pag.press("d",presses=2,interval=1) #to save in desktop
+	pag.press("d",interval=1) #to save in desktop
 	pag.press("enter")
 	pag.moveTo(531,339) #file save text box
 	pag.click()
@@ -285,7 +319,8 @@ def purity_percent(fragment_isotope):
 	pag.click()
 	pag.moveTo(365,195) #drop down 
 	pag.click()
-	pag.press("d",presses=2,interval=1) #to save in desktop
+	#pag.press("d",presses=2,interval=1) #to save in desktop
+	pag.press("d",interval=1) #to save in desktop
 	pag.press("enter")
 	pag.moveTo(389,413) #file save text box
 	pag.click()
@@ -370,23 +405,17 @@ def slice_array(arr,s):
 		new_array.append(isotope_info[t])
 	return new_array
 
-#slide an array with dictionaries in it
-def isotope_tuning_values():
-	#df = pd.DataFrame(None) #create our data frame
-	#df = pd.DataFrame(columns=["I_2 slit width","Intensity (pnA) ","Target thickness (microns) ","FP Slit width (H,V)","Purity transmission","Mom. Accpetance % ", "wedge thickness","wedge angle"])
-	#fragment_name  = input("Enter the symbol for fragment (i.e.Mg): ")
-	#fragment_A = input("Enter the atomic mass for fragment (i.e. 32): ")
-	bool_value = False
-	ans = input("Do you want to start from a particular isotope? (yes or no): ")
-	if ans == "yes":
-		bool_value = True
-	isotope_start= input("Which isotope would you like to start with? (Enter as 'Mg_32' for example.): ")
-	FP_slit_width = input("Enter the width of the FP slits: ")
+#slice an array with dictionaries in it
+def isotope_tuning_values(bool_value,FP_slit_width,isotope_start):
+	#ans = input("Do you want to start from a particular isotope? (yes or no): ")
+	#if ans == "yes":
+	#	bool_value = True
+	#isotope_start= input("Which isotope would you like to start with? (Enter as 'Mg_32' for example.): ")
+	#FP_slit_width = input("Enter the width of the FP slits: ")
 	set_projectile("Ca",140,80,48)
 	start = time.time()
 	set_FP_slits(FP_slit_width)
-	if bool_value == True:
-		print(f"Beginning with {isotope_start}...")
+	if bool_value == True: #if you want to start from  a particular isotope
 		new_isotope_dic = slice_array(isotope_info,isotope_start)
 		for i,dic in enumerate(new_isotope_dic): #loop for each fragment
 			#if dic["isotope"] == isotope_start:
@@ -399,6 +428,7 @@ def isotope_tuning_values():
 			wedge_thickness = 2300 #wedge thickness to start with 
 			for count in range(9): #loop over each wedge thickness
 				print(f"Currently using {wedge_thickness} microns for {iso[0]} {iso[1]}")
+				tune_spectrometer()
 				preliminary_wedge_angle = set_I2_wedge(str(wedge_thickness))	# There is a dependence between target and wedge. Doing it twice gives best results 
 				tune_spectrometer()
 				preliminary_target_thickness = get_thickness()
@@ -421,7 +451,7 @@ def isotope_tuning_values():
 			print(f"File saved as: {iso[0]}_{iso[1]}_finetune_data_LISE++.csv")
 			del df 
 	else:
-		print("Looping through everything...")
+		print("Looping through everything (Mg 32 - Mg 40)...")
 		for i,dic in enumerate(isotope_info): #loop for each fragment
 			df = pd.DataFrame(None) #create our data frame
 			df = pd.DataFrame(columns=["I_2 slit width","Intensity (pnA) ","Target thickness (microns) ","FP Slit width (H,V)","Purity transmission","Mom. Accpetance % ", "wedge thickness","wedge angle"])
