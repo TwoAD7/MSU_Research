@@ -5,7 +5,7 @@ from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
 import pyperclip as pc 
 import pandas as pd 
-#import numpy as np
+import numpy as np
 import csv
 import xlrd 
 import os 
@@ -92,6 +92,10 @@ def start():
 	else:
 		print("Looping through all isotopes (Mg 32 - Mg 40)...")
 	FP_slit_width = input("Enter the width of the FP slits: ")
+	wedge_range = input("What is the min. and max. of your wedge selection? ( 2300,3100 for example) ")
+	wedge_range=wedge_range.replace(","," ") #get rid of the underscore in the isotope name
+	wedge_range= wedge_range.split()
+	wedge_range_list= np.arange(int(wedge_range[0]),int(wedge_range[1])+100,100)
 	try:			
 		x,y=pag.center(pag.locateOnScreen("LISE++.png"))# find the image of the LISE++ icon,return coordinates for the cetner 
 		pag.moveTo(x,y)		
@@ -104,7 +108,7 @@ def start():
 	pag.doubleClick()
 	pag.dragTo(112, 257,.5) #configuration
 	pag.click(interval=.5) 
-	pag.moveTo(588,251) #load
+	pag.moveTo(825,251) #load
 	pag.click(interval=.5)
 	pag.moveTo(154,326) #textbox
 	pag.click()
@@ -115,7 +119,44 @@ def start():
 	pag.click()
 	pag.moveTo(471,323) #Open button
 	pag.click()
-	return flag,FP_slit_width,isotope_start
+	if flag == True:
+		return flag,FP_slit_width,isotope_start,wedge_range_list
+	else:
+		return flag,FP_slit_width,0,wedge_range_list
+
+#if the program is already open
+def start2():
+	flag = False
+	ans = input("Do you want to start from a particular isotope? (yes or no): ")
+	if ans == "yes" or ans =="YES" or ans == "Yes":
+		flag = True
+		isotope_start= input("Which isotope would you like to start with? (Enter as 'Mg_32' for example.): ")
+		print(f"Looping through {isotope_start} to Mg 40...")
+	else:
+		print("Looping through all isotopes (Mg 32 - Mg 40)...")
+	FP_slit_width = input("Enter the width of the FP slits: ")	
+	wedge_range = input("What is the min. and max. of your wedge selection? ( 2300,3100 for example) ")
+	wedge_range=wedge_range.replace(","," ") #get rid of the underscore in the isotope name
+	wedge_range= wedge_range.split()
+	wedge_range_list= np.arange(int(wedge_range[0]),int(wedge_range[1])+100,100)
+	print(wedge_range_list)
+	time.sleep(2.5)
+	#pag.moveTo(18,44) #file
+	#pag.doubleClick()
+	#pag.dragTo(112, 257,.5) #configuration
+	#pag.click(interval=.5) 
+	#pag.moveTo(825,251) #load
+	#pag.click(interval=.5)
+	#pag.moveTo(154,326) #textbox
+	#pag.click()
+	#pag.write("NSCL")
+	#pag.moveTo(471,323) #Open button
+	#pag.click()
+	#pag.moveTo(95,213) #A1900 file 
+	#pag.click()
+	#pag.moveTo(471,323) #Open button
+	#pag.click()
+	return flag,FP_slit_width,isotope_start,wedge_range_list
 
 
 
@@ -171,6 +212,8 @@ def set_I2_wedge(wedge_thickness):
 	pag.doubleClick()
 	pc.copy("")
 	time.sleep(2)
+	pag.hotkey('ctrl','c')
+	time.sleep(1)
 	pag.hotkey('ctrl','c')
 	angle = pc.paste()
 	pag.moveTo(168,622) #ok button 
@@ -259,8 +302,8 @@ def get_intensity(isotope,beam_element,beam_mass):
 	pag.click()
 	pag.moveTo(532,121) #drop down 
 	pag.click()
-	#pag.press("d",presses=2,interval=1) #to save in desktop
-	pag.press("d",interval=1) #to save in desktop
+	pag.press("d",presses=2,interval=1) #to save in desktop
+	#pag.press("d",interval=1) #to save in desktop
 	pag.press("enter")
 	pag.moveTo(531,339) #file save text box
 	pag.click()
@@ -315,12 +358,13 @@ def purity_percent(fragment_isotope):
 	pag.moveTo(14,316) #stats box
 	pag.click()
 	pag.press("enter") #accept
+	time.sleep(1)
 	pag.moveTo(1609,201) #file save
 	pag.click()
 	pag.moveTo(365,195) #drop down 
 	pag.click()
-	#pag.press("d",presses=2,interval=1) #to save in desktop
-	pag.press("d",interval=1) #to save in desktop
+	pag.press("d",presses=2,interval=1) #to save in desktop
+	#pag.press("d",interval=1) #to save in desktop
 	pag.press("enter")
 	pag.moveTo(389,413) #file save text box
 	pag.click()
@@ -345,8 +389,8 @@ def purity_percent(fragment_isotope):
 		total = total + val
 	print(f"The total amount of pps is {total}.")
 	frag_val = float(float(isotope_fragment))
-	print(f"Percent of {fragment_isotope} in beam is {(int(float(frag_val))/total)*100.} %")
-	percent =(int(float(frag_val))/total)*100.
+	print(f"Percent of {fragment_isotope} in beam is {(float(float(frag_val))/total)*100.} %")
+	percent =(float(float(frag_val))/total)*100.
 	return percent
 
 
@@ -406,7 +450,7 @@ def slice_array(arr,s):
 	return new_array
 
 #slice an array with dictionaries in it
-def isotope_tuning_values(bool_value,FP_slit_width,isotope_start):
+def isotope_tuning_values(bool_value,FP_slit_width,isotope_start,wedge_range):
 	#ans = input("Do you want to start from a particular isotope? (yes or no): ")
 	#if ans == "yes":
 	#	bool_value = True
@@ -425,15 +469,16 @@ def isotope_tuning_values(bool_value,FP_slit_width,isotope_start):
 			print(f"You are looking at the {iso} isotope.")  #returns the name of the isotope
 			iso = iso.split()
 			set_fragment(iso[0],iso[1])
-			wedge_thickness = 2300 #wedge thickness to start with 
-			for count in range(9): #loop over each wedge thickness
+			#wedge_thickness = 2300 #wedge thickness to start with 
+			for count,wedge_thickness in enumerate(wedge_range): #loop over each wedge thickness
 				print(f"Currently using {wedge_thickness} microns for {iso[0]} {iso[1]}")
 				tune_spectrometer()
 				preliminary_wedge_angle = set_I2_wedge(str(wedge_thickness))	# There is a dependence between target and wedge. Doing it twice gives best results 
 				tune_spectrometer()
 				preliminary_target_thickness = get_thickness()
 				tune_spectrometer()
-				wedge_angle = set_I2_wedge(str(wedge_thickness))					
+				wedge_angle = set_I2_wedge(str(wedge_thickness))
+				wedge_angle = "-" + wedge_angle					
 				tune_spectrometer()
 				target_thickness = get_thickness()
 				tune_spectrometer()
@@ -447,8 +492,8 @@ def isotope_tuning_values(bool_value,FP_slit_width,isotope_start):
 				wedge_thickness=wedge_thickness+100
 				print(f"Have gone through {count} iterations")
 				print(df)
-			df.to_csv(f"{iso[0]}_{iso[1]}_finetune_{FP_slit_width}_data_LISE++.csv")
-			print(f"File saved as: {iso[0]}_{iso[1]}_finetune_data_LISE++.csv")
+			df.to_csv(f"{iso[0]}_{iso[1]}_finetune_{FP_slit_width}_data_UPDATE_TEST_LISE++.csv")
+			print(f"File saved as: {iso[0]}_{iso[1]}_finetune_data_UPDATE_LISE++.csv")
 			del df 
 	else:
 		print("Looping through everything (Mg 32 - Mg 40)...")
@@ -459,8 +504,8 @@ def isotope_tuning_values(bool_value,FP_slit_width,isotope_start):
 			print(f"You are looking at the {iso} isotope.")  #returns the name of the isotope
 			iso = iso.split()
 			set_fragment(iso[0],iso[1])
-			wedge_thickness = 2300 #wedge thickness to start with 
-			for count in range(9): #loop over each wedge thickness
+			#wedge_thickness = 2300 #wedge thickness to start with 
+			for count,wedge_thickness in enumerate(wedge_range): #loop over each wedge thickness
 				print(f"Currently using {wedge_thickness} microns for {iso[0]} {iso[1]}")
 				preliminary_wedge_angle = set_I2_wedge(str(wedge_thickness))	# There is a dependence between target and wedge. Doing it twice gives best results 
 				tune_spectrometer()
@@ -480,8 +525,8 @@ def isotope_tuning_values(bool_value,FP_slit_width,isotope_start):
 				wedge_thickness=wedge_thickness+100
 				print(f"Have gone through {count} iterations")
 				print(df)
-			df.to_csv(f"{iso[0]}_{iso[1]}_finetune_{FP_slit_width}_data_LISE++.csv")
-			print(f"File saved as: {iso[0]}_{iso[1]}_finetune_data_LISE++.csv")
+			df.to_csv(f"{iso[0]}_{iso[1]}_finetune_{FP_slit_width}_data_UPDATE_TEST_LISE++.csv")
+			print(f"File saved as: {iso[0]}_{iso[1]}_finetune_{FP_slit_width}_UPDATE_data_LISE++.csv")
 			del df 
 	end = time.time()
 	print(f"It took {(end-start)/60.0} minutes to run everything.")
