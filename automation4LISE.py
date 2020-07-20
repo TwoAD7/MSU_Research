@@ -46,7 +46,7 @@ def txt2csv(path):
 #pixel locations for each isotope based on my screen (Resolution: 1536x864)
 pixel_locations = { "Mg_32":{"x":1121,"y":626},"Mg_33":{"x":1116,"y":626},\
 "Mg_34":{"x":1116,"y":626} ,"Mg_35":{"x":1116,"y":626},"Mg_36":{"x":1136,"y":626},\
-"Mg_37":{"x":1116,"y":626},"Mg_38":{"x":1116,"y":626},"Mg_40":{"x":1824,"y":626}}
+"Mg_37":{"x":1116,"y":626},"Mg_38":{"x":1116,"y":626},"Mg_40":{"x":1106,"y":626}}
 
 #array of maps, data is the key to the map, replace the zero's with arrays of data
 isotope_info = [ \
@@ -128,12 +128,22 @@ def start():
 def start2():
 	flag = False
 	ans = input("Do you want to start from a particular isotope? (yes or no): ")
+	ans2 = input("Do you want to end with a particular isotope? (yes or no): ")
 	if ans == "yes" or ans =="YES" or ans == "Yes":
 		flag = True
 		isotope_start= input("Which isotope would you like to start with? (Enter as 'Mg_32' for example.): ")
-		print(f"Looping through {isotope_start} to Mg 40...")
+		print(f"Starting with {isotope_start}...")
 	else:
-		print("Looping through all isotopes (Mg 32 - Mg 40)...")
+		isotope_start = "Mg_32"
+		print(f"Starting with {isotope_start}...")
+	if ans2 == "yes" or ans =="YES" or ans == "Yes":
+		#flag = True
+		isotope_end= input("Which isotope would you like to end with? (Enter as 'Mg_32' for example.): ")
+		print(f"Ending with {isotope_end}...")
+	else:
+		isotope_end = "Mg_40"
+		print("Ending with Mg 40...")
+	print(f"Looping through {isotope_start} to {isotope_end}...")
 	FP_slit_width = input("Enter the width of the FP slits: ")	
 	wedge_range = input("What is the min. and max. of your wedge selection? ( 2300,3100 for example) ")
 	wedge_range=wedge_range.replace(","," ") #get rid of the underscore in the isotope name
@@ -156,7 +166,7 @@ def start2():
 	#pag.click()
 	#pag.moveTo(471,323) #Open button
 	#pag.click()
-	return flag,FP_slit_width,isotope_start,wedge_range_list
+	return flag,FP_slit_width,isotope_start,isotope_end,wedge_range_list
 
 
 
@@ -302,8 +312,8 @@ def get_intensity(isotope,beam_element,beam_mass):
 	pag.click()
 	pag.moveTo(532,121) #drop down 
 	pag.click()
-	pag.press("d",presses=2,interval=1) #to save in desktop
-	#pag.press("d",interval=1) #to save in desktop
+	#pag.press("d",presses=2,interval=1) #to save in desktop
+	pag.press("d",interval=1) #to save in desktop
 	pag.press("enter")
 	pag.moveTo(531,339) #file save text box
 	pag.click()
@@ -363,8 +373,8 @@ def purity_percent(fragment_isotope):
 	pag.click()
 	pag.moveTo(365,195) #drop down 
 	pag.click()
-	pag.press("d",presses=2,interval=1) #to save in desktop
-	#pag.press("d",interval=1) #to save in desktop
+	#pag.press("d",presses=2,interval=1) #to save in desktop
+	pag.press("d",interval=1) #to save in desktop
 	pag.press("enter")
 	pag.moveTo(389,413) #file save text box
 	pag.click()
@@ -450,7 +460,7 @@ def slice_array(arr,s):
 	return new_array
 
 #slice an array with dictionaries in it
-def isotope_tuning_values(bool_value,FP_slit_width,isotope_start,wedge_range):
+def isotope_tuning_values(bool_value,FP_slit_width,isotope_start,isotope_end,wedge_range):
 	#ans = input("Do you want to start from a particular isotope? (yes or no): ")
 	#if ans == "yes":
 	#	bool_value = True
@@ -495,6 +505,9 @@ def isotope_tuning_values(bool_value,FP_slit_width,isotope_start,wedge_range):
 			df.to_csv(f"{iso[0]}_{iso[1]}_finetune_{FP_slit_width}_data_UPDATE_TEST_LISE++.csv")
 			print(f"File saved as: {iso[0]}_{iso[1]}_finetune_data_UPDATE_LISE++.csv")
 			del df 
+			if(dic['isotope'] == isotope_end):
+				print(f"YOU HAVE REACHED {isotope_end}!")
+				break
 	else:
 		print("Looping through everything (Mg 32 - Mg 40)...")
 		for i,dic in enumerate(isotope_info): #loop for each fragment
