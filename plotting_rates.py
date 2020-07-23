@@ -3,10 +3,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
+"""
+This is to visualize a comparison between different intensities from the NSCL and FRIB facility. 
+This runs with python3
+"""
+
 barWidth = 0.25
 plt.figure(figsize=(7,7)) 
 # set height of bar
-intensity_NSCL = [1.78e4,2.92e3, 4.01e2,52.9,6.22,.654,.0642,8.11e-4] #32,33,34,35,36,37
+intensity_NSCL = [1.78e4,2.92e3, 4.01e2,52.9,6.22,.654,.0642,8.11e-4] #32,33,34,35,36,37,38,40
 intensity_FRIB = [2.27e6,3.6e5 ,4.44e4,7.45e3,9.32e2, 5.33e1,9.75,.114]
 intensity_FRIB_online = [1.79e6,2.97e5 ,4.41e4,6.05e3,7.88e2, 9.85e1,13.1,.232]
 
