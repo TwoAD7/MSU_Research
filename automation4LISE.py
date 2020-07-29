@@ -15,7 +15,7 @@ Roy Salinas
 Module to control automation in LISE++ with NSCL configuration
 
 Purpose: To retrive particular parameters from LISE++ such as beam intensity,
-beam purity, wedge thickness, and wedge angle, momentum acceptance, focal
+beam purity, wedge thickness, wedge angle, momentum acceptance, focal
 plane slit width, and Image 2 slit width. 
 
 All beam data comes from NSCL website: https://nscl.msu.edu/users/beams.html
@@ -25,7 +25,6 @@ Python version: 3.7.1
 
 #path = os.path.expanduser("~\Desktop")
 #print(path)
-
 
 pag.PAUSE=1
 pag.FAILSAFE=True
@@ -82,15 +81,59 @@ beam_info = {"O_16": {"Energy":150,"Intensity":175}, "O_18":{"Energy":120,"Inten
 """
 
 
+def _isotope_start():
+	isotope_start= input("Which isotope would you like to start with? (Enter as 'Mg_32' for example.): ")
+	print(f"Starting with {isotope_start}...")
+	return isotope_start
+
+def _isotope_end():
+	isotope_end= input("Which isotope would you like to end with? (Enter as 'Mg_36' for example.): ")
+	print(f"Ending with {isotope_end}...")
+	return isotope_end
+
+
 def start():
-	flag = False
 	ans = input("Do you want to start from a particular isotope? (yes or no): ")
 	if ans == "yes" or ans =="YES" or ans == "Yes":
-		flag = True
-		isotope_start= input("Which isotope would you like to start with? (Enter as 'Mg_32' for example.): ")
-		print(f"Looping through {isotope_start} to Mg 40...")
+		isotope_start= _isotope_start()
+	elif ans == "no" or ans == "No" or ans == "NO":
+		isotope_start = "Mg_32"
+		print(f"Starting with {isotope_start}...")
 	else:
-		print("Looping through all isotopes (Mg 32 - Mg 40)...")
+		input_flag = True
+		while input_flag:
+			ans = input("Invalid input. Only 'yes' or 'no' accepted. Do you want to start from a particular isotope? (yes or no): ")
+			if ans == "yes":
+				input_flag = False
+				isotope_start= _isotope_start()
+				break
+			elif ans =="no":
+				input_flag = False
+				isotope_start = "Mg_32"
+				print(f"Starting with {isotope_start}...")
+				break
+
+	ans2 = input("Do you want to end with a particular isotope? (yes or no): ")
+	if ans2 == "yes" or ans2 =="YES" or ans2 == "Yes":
+		#flag = True
+		isotope_end= _isotope_end()
+	elif ans2 == "no" or ans2 == "No" or ans2 == "NO":
+		isotope_end = "Mg_40"
+		print(f"Ending with {isotope_end}...")
+	else:
+		_input_flag = True
+		while _input_flag:
+			ans2 = input("Invalid input. Only 'yes' or 'no' accepted. Do you want to end from a particular isotope? (yes or no): ")
+			if ans2 == "yes":
+				_input_flag = False
+				isotope_end= _isotope_end()
+				break
+			elif ans2 =="no":
+				_input_flag = False
+				isotope_end = "Mg_40"
+				print(f"Ending with {isotope_end}...")
+				break
+
 	FP_slit_width = input("Enter the width of the FP slits: ")
 	wedge_range = input("What is the min. and max. of your wedge selection? ( 2300,3100 for example) ")
 	wedge_range=wedge_range.replace(","," ") #get rid of the underscore in the isotope name
@@ -119,31 +162,50 @@ def start():
 	pag.click()
 	pag.moveTo(471,323) #Open button
 	pag.click()
-	if flag == True:
-		return flag,FP_slit_width,isotope_start,wedge_range_list
-	else:
-		return flag,FP_slit_width,0,wedge_range_list
+	return FP_slit_width,isotope_start,isotope_end,wedge_range_list
 
-#if the program is already open
+#if the program is already open and GUI is viisible
 def start2():
-	flag = False
 	ans = input("Do you want to start from a particular isotope? (yes or no): ")
-	ans2 = input("Do you want to end with a particular isotope? (yes or no): ")
 	if ans == "yes" or ans =="YES" or ans == "Yes":
-		flag = True
-		isotope_start= input("Which isotope would you like to start with? (Enter as 'Mg_32' for example.): ")
-		print(f"Starting with {isotope_start}...")
-	else:
+		isotope_start= _isotope_start()
+	elif ans == "no" or ans == "No" or ans == "NO":
 		isotope_start = "Mg_32"
 		print(f"Starting with {isotope_start}...")
-	if ans2 == "yes" or ans =="YES" or ans == "Yes":
+	else:
+		input_flag = True
+		while input_flag:
+			ans = input("Invalid input. Only 'yes' or 'no' accepted. Do you want to start from a particular isotope? (yes or no): ")
+			if ans == "yes":
+				input_flag = False
+				isotope_start= _isotope_start()
+				break
+			elif ans =="no":
+				input_flag = False
+				isotope_start = "Mg_32"
+				print(f"Starting with {isotope_start}...")
+				break
+
+	ans2 = input("Do you want to end with a particular isotope? (yes or no): ")
+	if ans2 == "yes" or ans2 =="YES" or ans2 == "Yes":
 		#flag = True
-		isotope_end= input("Which isotope would you like to end with? (Enter as 'Mg_32' for example.): ")
+		isotope_end= _isotope_end()
+	elif ans2 == "no" or ans2 == "No" or ans2 == "NO":
+		isotope_end = "Mg_40"
 		print(f"Ending with {isotope_end}...")
 	else:
-		isotope_end = "Mg_40"
-		print("Ending with Mg 40...")
-	print(f"Looping through {isotope_start} to {isotope_end}...")
+		_input_flag = True
+		while _input_flag:
+			ans2 = input("Invalid input. Only 'yes' or 'no' accepted. Do you want to end from a particular isotope? (yes or no): ")
+			if ans2 == "yes":
+				_input_flag = False
+				isotope_end= _isotope_end()
+				break
+			elif ans2 =="no":
+				_input_flag = False
+				isotope_end = "Mg_40"
+				print(f"Ending with {isotope_end}...")
+				break
 	FP_slit_width = input("Enter the width of the FP slits: ")	
 	wedge_range = input("What is the min. and max. of your wedge selection? ( 2300,3100 for example) ")
 	wedge_range=wedge_range.replace(","," ") #get rid of the underscore in the isotope name
@@ -151,24 +213,7 @@ def start2():
 	wedge_range_list= np.arange(int(wedge_range[0]),int(wedge_range[1])+100,100)
 	print(wedge_range_list)
 	time.sleep(2.5)
-	#pag.moveTo(18,44) #file
-	#pag.doubleClick()
-	#pag.dragTo(112, 257,.5) #configuration
-	#pag.click(interval=.5) 
-	#pag.moveTo(825,251) #load
-	#pag.click(interval=.5)
-	#pag.moveTo(154,326) #textbox
-	#pag.click()
-	#pag.write("NSCL")
-	#pag.moveTo(471,323) #Open button
-	#pag.click()
-	#pag.moveTo(95,213) #A1900 file 
-	#pag.click()
-	#pag.moveTo(471,323) #Open button
-	#pag.click()
-	return flag,FP_slit_width,isotope_start,isotope_end,wedge_range_list
-
-
+	return FP_slit_width,isotope_start,isotope_end,wedge_range_list
 
 #to set the beam
 def set_projectile(projectile_name,energy,intensity,A):
@@ -232,8 +277,6 @@ def set_I2_wedge(wedge_thickness):
 	pag.click()
 	print(f"The angle for the wedge is -{angle}.")
 	return str(angle)
-
-
 
 def tune_spectrometer():
 	print("Tuning spectrometer...")
@@ -337,12 +380,6 @@ def get_intensity(isotope,beam_element,beam_mass):
 		_intensity=df.iloc[6,0] #location of the intensity in the data frame 
 		_intensity=_intensity.split()
 		print(f"The intensity for {isotope} with {beam_element} {beam_mass} is {_intensity[4]}.") #intensity value
-		"""
-		for i in range(len(isotope_info)):
-			if isotope_info[i]["isotope"] == isotope:
-				isotope_info[i]["intensity"] = _intensity[4] #change value in the dictionary
-				print(isotope_info[i]["isotope"],isotope_info[i]["intensity"])
-		"""
 		return _intensity[4],flag
 
 #retrieve the transmission in X-space 
@@ -403,15 +440,13 @@ def purity_percent(fragment_isotope):
 	percent =(float(float(frag_val))/total)*100.
 	return percent
 
-
+#This loop is used to find the best beam for each isotope. However, it has already been determined that the best beam is Ca 48.
 def isotope_loop():
 	beam_data = []
-	#with open("LISE_data.txt")
 	start = time.time()
 	df = pd.DataFrame(None) #create our data frame
 	for i,dic in enumerate(isotope_info): #loop for fragments
 		df = df[0:0]
-		#df = pd.DataFrame(None) #create our data frame
 		df = pd.DataFrame(columns=["Beam element","A (u)","Beam energy (MeV/u)","Beam Intensity (pnA)","Target thickness (microns)","Fragment Intensity (pnA)"])
 		data = [] 
 		iso=dic['isotope'].replace("_"," ") #get rid of the underscore in the isotope name
@@ -446,101 +481,62 @@ def isotope_loop():
 
 
 
-#to "slice" a dictionary and return slided dictionary 
+#to "slice" a an array of dictionaries and return slided array  
 def slice_array(arr,s):
 	new_array = []
 	index =0
-	for i,dic in enumerate(isotope_info):
-		temp_dic = isotope_info[i]
+	for i,dic in enumerate(arr):
+		temp_dic = arr[i] #grab individual dictionary
 		if temp_dic["isotope"] == str(s):
 			index =i
 			break
 	for t in range(index,len(arr)):
-		new_array.append(isotope_info[t])
-	return new_array
+		new_array.append(arr[t])
+	return new_array #return a sliced array containing dictionaries
 
-#slice an array with dictionaries in it
-def isotope_tuning_values(bool_value,FP_slit_width,isotope_start,isotope_end,wedge_range):
-	#ans = input("Do you want to start from a particular isotope? (yes or no): ")
-	#if ans == "yes":
-	#	bool_value = True
-	#isotope_start= input("Which isotope would you like to start with? (Enter as 'Mg_32' for example.): ")
-	#FP_slit_width = input("Enter the width of the FP slits: ")
+#function to find the best configuration using a Ca 48 beam
+def isotope_tuning_values(FP_slit_width,isotope_start,isotope_end,wedge_range):
 	set_projectile("Ca",140,80,48)
 	start = time.time()
 	set_FP_slits(FP_slit_width)
-	if bool_value == True: #if you want to start from  a particular isotope
-		new_isotope_dic = slice_array(isotope_info,isotope_start)
-		for i,dic in enumerate(new_isotope_dic): #loop for each fragment
-			#if dic["isotope"] == isotope_start:
-			df = pd.DataFrame(None) #create our data frame
-			df = pd.DataFrame(columns=["I_2 slit width","Intensity (pnA) ","Target thickness (microns) ","FP Slit width (H,V)","Purity transmission","Mom. Accpetance % ", "wedge thickness","wedge angle"])
-			iso=dic['isotope'].replace("_"," ") #get rid of the underscore in the isotope name
-			print(f"You are looking at the {iso} isotope.")  #returns the name of the isotope
-			iso = iso.split()
-			set_fragment(iso[0],iso[1])
-			#wedge_thickness = 2300 #wedge thickness to start with 
-			for count,wedge_thickness in enumerate(wedge_range): #loop over each wedge thickness
-				print(f"Currently using {wedge_thickness} microns for {iso[0]} {iso[1]}")
-				tune_spectrometer()
-				preliminary_wedge_angle = set_I2_wedge(str(wedge_thickness))	# There is a dependence between target and wedge. Doing it twice gives best results 
-				tune_spectrometer()
-				preliminary_target_thickness = get_thickness()
-				tune_spectrometer()
-				wedge_angle = set_I2_wedge(str(wedge_thickness))
-				wedge_angle = "-" + wedge_angle					
-				tune_spectrometer()
-				target_thickness = get_thickness()
-				tune_spectrometer()
-				frag_intensity,flag = get_intensity(dic['isotope'],"Ca",48) #pass the isotope name to get intensity and save it to the map with the frag info
-				if flag == True:
-					continue
-				#FP_x_space_transmission = FP_slit_X_transmission_percent()
-				_purity_percent = purity_percent(iso[0] + iso[1]) #pass in the name of the fragment isotope
-				print(f"Purity is {_purity_percent}")
-				df.loc[count] = [29.5,frag_intensity,target_thickness,FP_slit_width,_purity_percent,1,wedge_thickness,wedge_angle]
-				wedge_thickness=wedge_thickness+100
-				print(f"Have gone through {count} iterations")
-				print(df)
-			df.to_csv(f"{iso[0]}_{iso[1]}_finetune_{FP_slit_width}_data_UPDATE_TEST_LISE++.csv")
-			print(f"File saved as: {iso[0]}_{iso[1]}_finetune_data_UPDATE_LISE++.csv")
-			del df 
-			if(dic['isotope'] == isotope_end):
-				print(f"YOU HAVE REACHED {isotope_end}!")
-				break
-	else:
-		print("Looping through everything (Mg 32 - Mg 40)...")
-		for i,dic in enumerate(isotope_info): #loop for each fragment
-			df = pd.DataFrame(None) #create our data frame
-			df = pd.DataFrame(columns=["I_2 slit width","Intensity (pnA) ","Target thickness (microns) ","FP Slit width (H,V)","Purity transmission","Mom. Accpetance % ", "wedge thickness","wedge angle"])
-			iso=dic['isotope'].replace("_"," ") #get rid of the underscore in the isotope name
-			print(f"You are looking at the {iso} isotope.")  #returns the name of the isotope
-			iso = iso.split()
-			set_fragment(iso[0],iso[1])
-			#wedge_thickness = 2300 #wedge thickness to start with 
-			for count,wedge_thickness in enumerate(wedge_range): #loop over each wedge thickness
-				print(f"Currently using {wedge_thickness} microns for {iso[0]} {iso[1]}")
-				preliminary_wedge_angle = set_I2_wedge(str(wedge_thickness))	# There is a dependence between target and wedge. Doing it twice gives best results 
-				tune_spectrometer()
-				preliminary_target_thickness = get_thickness()
-				tune_spectrometer()
-				wedge_angle = set_I2_wedge(str(wedge_thickness))					
-				tune_spectrometer()
-				target_thickness = get_thickness()
-				tune_spectrometer()
-				frag_intensity,flag = get_intensity(dic['isotope'],"Ca",48) #pass the isotope name to get intensity and save it to the map with the frag info
-				if flag == True:
-					continue
-				#FP_x_space_transmission = FP_slit_X_transmission_percent()
-				_purity_percent = purity_percent(iso[0] + iso[1]) #pass in the name of the fragment isotope
-				print(f"Purity is {_purity_percent}")
-				df.loc[count] = [29.5,frag_intensity,target_thickness,FP_slit_width,_purity_percent,1,wedge_thickness,wedge_angle]
-				wedge_thickness=wedge_thickness+100
-				print(f"Have gone through {count} iterations")
-				print(df)
-			df.to_csv(f"{iso[0]}_{iso[1]}_finetune_{FP_slit_width}_data_UPDATE_TEST_LISE++.csv")
-			print(f"File saved as: {iso[0]}_{iso[1]}_finetune_{FP_slit_width}_UPDATE_data_LISE++.csv")
-			del df 
+	#if bool_value == True: #if you want to start from  a particular isotope
+	new_isotope_dic = slice_array(isotope_info,isotope_start)
+	for i,dic in enumerate(new_isotope_dic): #loop for each fragment
+		df = pd.DataFrame(None) #create our data frame
+		df = pd.DataFrame(columns=["I_2 slit width (mm) ","Intensity (pnA) ","Target thickness (microns) ","Horizontal FP Slit width (mm)","Purity transmission % ","Mom. Accpetance % ", "Wedge thickness (microns) ","wedge angle (mrad)"])
+		iso=dic['isotope'].replace("_"," ") #get rid of the underscore in the isotope name
+		print(f"You are looking at the {iso} isotope.")  #returns the name of the isotope
+		iso = iso.split()
+		set_fragment(iso[0],iso[1])
+		#wedge_thickness = 2300 #wedge thickness to start with 
+		for count,wedge_thickness in enumerate(wedge_range): #loop over each wedge thickness
+			print(f"Currently using {wedge_thickness} microns for {iso[0]} {iso[1]}")
+			tune_spectrometer()
+			preliminary_wedge_angle = set_I2_wedge(str(wedge_thickness))	# There is a dependence between target and wedge. Doing it twice gives best results 
+			tune_spectrometer()
+			preliminary_target_thickness = get_thickness()
+			tune_spectrometer()
+			wedge_angle = set_I2_wedge(str(wedge_thickness))
+			wedge_angle = "-" + wedge_angle					
+			tune_spectrometer()
+			target_thickness = get_thickness()
+			tune_spectrometer()
+			frag_intensity,flag = get_intensity(dic['isotope'],"Ca",48) #pass the isotope name to get intensity and save it to the map with the frag info
+			if flag == True: #if we have zero transmission, skip that wedge thickness
+				continue
+			#FP_x_space_transmission = FP_slit_X_transmission_percent()
+			_purity_percent = purity_percent(iso[0] + iso[1]) #pass in the name of the fragment isotope
+			print(f"Purity is {_purity_percent}")
+			df.loc[count] = [29.5,frag_intensity,target_thickness,FP_slit_width,_purity_percent,1,wedge_thickness,wedge_angle] #harcode the 1% momentum acceptance
+			wedge_thickness=wedge_thickness+100
+			print(f"Have gone through {count} iterations")
+			print(df)
+		df.to_csv(f"{iso[0]}_{iso[1]}_finetune_{FP_slit_width}_data_LISE++.csv")
+		print(f"File saved as: {iso[0]}_{iso[1]}_finetune_{FP_slit_width}_data_LISE++.csv")
+		del df 
+		if(dic['isotope'] == isotope_end):
+			print(f"YOU HAVE REACHED {isotope_end}!")
+			break
 	end = time.time()
 	print(f"It took {(end-start)/60.0} minutes to run everything.")
 
