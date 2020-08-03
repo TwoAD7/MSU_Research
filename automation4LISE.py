@@ -1,13 +1,10 @@
 import time
-import pyautogui as pag 
-import json 
-from PIL import Image, ImageOps
+import pyautogui as pag  
 import matplotlib.pyplot as plt
 import pyperclip as pc 
 import pandas as pd 
 import numpy as np
 import csv
-import xlrd 
 import os 
 
 """
@@ -20,7 +17,8 @@ plane slit width, and Image 2 slit width.
 
 All beam data comes from NSCL website: https://nscl.msu.edu/users/beams.html
 
-Python version: 3.7.1
+Python version: 3.7.1 
+
 """
 
 #path = os.path.expanduser("~\Desktop")
@@ -42,11 +40,23 @@ def txt2csv(path):
 			writer.writerows(lines) #write each line
 
 
-#pixel locations for each isotope based on my screen (Resolution: 1536x864)
+"""
+pixel locations for each isotope based on my screen (Resolution: 1920x1080)
+
+Note: This can be improved to contain images of the isotope that appears on the screen. Doing this rids the dependence 
+on one's screen resolution and local pixel coordinates.
+
+"""
 pixel_locations = { "Mg_32":{"x":1121,"y":626},"Mg_33":{"x":1116,"y":626},\
 "Mg_34":{"x":1116,"y":626} ,"Mg_35":{"x":1116,"y":626},"Mg_36":{"x":1136,"y":626},\
 "Mg_37":{"x":1116,"y":626},"Mg_38":{"x":1116,"y":626},"Mg_40":{"x":1106,"y":626}}
 
+
+"""
+An array of dictionaries (c++ maps). "data" is the key for the corresponding isotope and its value is an array of data. 
+Using zeros as place holders for intialization. 
+
+"""
 #array of maps, data is the key to the map, replace the zero's with arrays of data
 isotope_info = [ \
 {"isotope":"Mg_32", "data":0.0}, \
@@ -69,7 +79,7 @@ beam_info = {"O_16": {"Energy":150,"Intensity":175}, "O_18":{"Energy":120,"Inten
 }
 
 
-#Didn't include the rest of the beam list, intensity was too low.
+#Didn't include the rest of the beam list, intensity was too low to be significant.
 """
 ,   \
 "Se_82":{"Energy":140,"Intensity":45}, "Kr_78":{"Energy":150,"Intensity":25},  \
@@ -91,7 +101,13 @@ def _isotope_end():
 	print(f"Ending with {isotope_end}...")
 	return isotope_end
 
+"""
+If program is not open, look for the program image on deskotp, and click on it. 
 
+Note: Could improve by having it go directly to the LISE++.exe file and executing it. Could do this 
+with a shell script or here (in the python script).
+
+"""
 def start():
 	ans = input("Do you want to start from a particular isotope? (yes or no): ")
 	if ans == "yes" or ans =="YES" or ans == "Yes":
@@ -164,7 +180,7 @@ def start():
 	pag.click()
 	return FP_slit_width,isotope_start,isotope_end,wedge_range_list
 
-#if the program is already open and GUI is viisible
+#If the program is already open and GUI is viisible
 def start2():
 	ans = input("Do you want to start from a particular isotope? (yes or no): ")
 	if ans == "yes" or ans =="YES" or ans == "Yes":
@@ -215,7 +231,7 @@ def start2():
 	time.sleep(2.5)
 	return FP_slit_width,isotope_start,isotope_end,wedge_range_list
 
-#to set the beam
+#to set beam
 def set_projectile(projectile_name,energy,intensity,A):
 	print("Setting projectile...")
 	pag.moveTo(16,124) #projectile button 
@@ -236,6 +252,7 @@ def set_projectile(projectile_name,energy,intensity,A):
 	pag.click()
 	time.sleep(1)
 
+#to set the Focal Plane (FP) slits
 def set_FP_slits(slit_width):
 	print("Setting FP_Slits...")
 	pag.moveTo(65,684) #move to slit button 
@@ -248,6 +265,7 @@ def set_FP_slits(slit_width):
 	pag.moveTo(71,744)
 	pag.click()
 
+#to set the wedge thickness 
 def set_I2_wedge(wedge_thickness):
 	print("Setting I2_wedge...")
 	pag.moveTo(60,461) #move to wedge button 
@@ -267,7 +285,7 @@ def set_I2_wedge(wedge_thickness):
 	pag.doubleClick()
 	pc.copy("")
 	time.sleep(2)
-	pag.hotkey('ctrl','c')
+	pag.hotkey('ctrl','c') #done twice due to bug in not properly copying. This fixes that bug.
 	time.sleep(1)
 	pag.hotkey('ctrl','c')
 	angle = pc.paste()
@@ -300,6 +318,7 @@ def set_fragment(fragment,A):
 	pag.click()
 	time.sleep(1)
 
+#to retrive the thickness 
 def get_thickness():
 	target_thickness = 0
 	pc.copy("") #clear clipboard
@@ -340,6 +359,7 @@ def get_thickness():
 	pag.click()
 	return target_thickness 
 
+#to retrive intensity
 def get_intensity(isotope,beam_element,beam_mass):
 	flag = False
 	print(isotope)
@@ -366,7 +386,7 @@ def get_intensity(isotope,beam_element,beam_mass):
 	pag.press("enter") #this "enter" saves the file to desktop
 	pag.moveTo(1563,44)
 	pag.click()
-	df = pd.read_csv("C:\\Users\Owner\Desktop\junk.txt") #path to temporary file
+	df = pd.read_csv("C:\\Users\Owner\Desktop\junk.txt") #path to temporary file. NEED TO UPDATE 
 	#print(df)
 	intensity_check=df.iloc[0,0]  #location of the intensity in the data frame. Usually included an extra line if it is zero
 	intensity_check = intensity_check.split()
@@ -423,7 +443,7 @@ def purity_percent(fragment_isotope):
 	pag.click()
 	pag.moveTo(1877,13)
 	pag.click()
-	df = pd.read_csv("C:\\Users\Owner\Desktop\pps_junk.txt",error_bad_lines=False) #path to temporary file
+	df = pd.read_csv("C:\\Users\Owner\Desktop\pps_junk.txt",error_bad_lines=False) #path to temporary file. NEED TO UPDATE
 	print(f"Size of data frame is {df.size}.")
 	_string = df.iloc[5,0] #get the pps for isotope in question
 	_string = _string.split()
@@ -432,7 +452,7 @@ def purity_percent(fragment_isotope):
 	for i in range(5,df.size): 
 		string = df.iloc[i,0]
 		string = string.split()
-		val = float(float(string[13])) #to get it with the correct scientific notation
+		val = float(float(string[13])) #to get it to correct scientific notation
 		total = total + val
 	print(f"The total amount of pps is {total}.")
 	frag_val = float(float(isotope_fragment))
@@ -481,29 +501,29 @@ def isotope_loop():
 
 
 
-#to "slice" a an array of dictionaries and return slided array  
-def slice_array(arr,s):
+#to "slice" an array of dictionaries and return slided array  
+def slice_array(arr,start):
 	new_array = []
 	index =0
 	for i,dic in enumerate(arr):
-		temp_dic = arr[i] #grab individual dictionary
-		if temp_dic["isotope"] == str(s):
+		temp_dic = arr[i] #grab individual dictionary in that specific array index
+		if temp_dic["isotope"] == str(start): #if starting isotope is found, save the index location
 			index =i
 			break
 	for t in range(index,len(arr)):
 		new_array.append(arr[t])
-	return new_array #return a sliced array containing dictionaries
+	return new_array #return a sliced array containing dictionaries from starting isotope
 
 #function to find the best configuration using a Ca 48 beam
 def isotope_tuning_values(FP_slit_width,isotope_start,isotope_end,wedge_range):
-	set_projectile("Ca",140,80,48)
+	set_projectile("Ca",140,80,48) #set the beam here with element name, energy, intensity, atomic number 
 	start = time.time()
 	set_FP_slits(FP_slit_width)
 	#if bool_value == True: #if you want to start from  a particular isotope
 	new_isotope_dic = slice_array(isotope_info,isotope_start)
 	for i,dic in enumerate(new_isotope_dic): #loop for each fragment
 		df = pd.DataFrame(None) #create our data frame
-		df = pd.DataFrame(columns=["I_2 slit width (mm) ","Intensity (pnA) ","Target thickness (microns) ","Horizontal FP Slit width (mm)","Purity transmission % ","Mom. Accpetance % ", "Wedge thickness (microns) ","wedge angle (mrad)"])
+		df = pd.DataFrame(columns=["I_2 slit width (mm) ","Intensity (pps) ","Target thickness (microns) ","Horizontal FP Slit width (mm)","Purity transmission % ","Mom. Accpetance % ", "Wedge thickness (microns) ","wedge angle (mrad)"])
 		iso=dic['isotope'].replace("_"," ") #get rid of the underscore in the isotope name
 		print(f"You are looking at the {iso} isotope.")  #returns the name of the isotope
 		iso = iso.split()
