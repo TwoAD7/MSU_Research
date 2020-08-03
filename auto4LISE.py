@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib  import cm
 import seaborn as sns
 
-#file that contains the interface to the automation 
+#interface to the automation script
 
 def main():
 	
@@ -16,17 +16,6 @@ def main():
 		FP_slit_width,isotope_start,isotope_end,wedge_range=a4l.start()  
 	else:
 		FP_slit_width,isotope_start,isotope_end,wedge_range=a4l.start2()
-	#a4l.show_pixels()
-	#a4l.FP_slit_X_transmission_percent()
-	#a4l.start()
-	#a4l.set_projectile("Ca",48,67)
-	#a4l.set_fragment("Al",22)
-	#a4l.get_thickness()
-	#a4l.save()
-	#a4l.isotope_loop()
-	#a4l.get_intensity("Mg_35","Ar",36)
 	a4l.isotope_tuning_values(FP_slit_width,isotope_start,isotope_end,wedge_range)
-	#a4l.purity_percent("Mg_36")
-	#a4l.set_I2_wedge(2300)
 	
 main()
