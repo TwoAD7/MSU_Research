@@ -1,0 +1,22 @@
+> This folder contains preliminary LISE++ files for optimal configurations using NSCL and FRIB facilities
+to study isotopes Mg 32 through Mg 40. 
+
+> All NSCL and FRIB files have been set to dp/p = 1%; at the I2_Slits and the pre-separator focal
+plane (O4_PS_FP), respectively.
+
+> To allow for largest intenisty possible on the FRIB LISE++ configuration, the pre-separator 
+slits (PS_Wedge_Slits) are set to the aperture limit, 135 mm. Wedges and momentum acceptances were 
+later adjusted downstream to yield optimal purity results without large comprimise to intensity. 
+Beware to user, the momentum acceptance changes downstream and requires one to keep this in 
+mind. 
+
+> All NSCL files have FP_Slits set to 10 mm and have purity greater than 91%.
+
+> All FRIB files have purity greater than 92%. 
+
+> FRIB intensities are all 2-3 orders of magnitude greater than NSCL intensities.  
+
+> For isotopes Mg 38 and Mg 40, there are 2-3 LISE++ files for each isotope. Each file is a 
+different compromise on purity and intensity for the corresponding isotope. The intensities 
+that are used in the UPDATE presentation are from Mg_40_FRIB_3 and Mg_38_FRIB_3. 
+ 
