@@ -6,6 +6,9 @@ INFORMATION ABOUT RUNNING SCRIPT:
 * The automation scripts were written in python 3. If you do not have python 3 installed, you will need to install it as
 certain functions are only available in python 3. A quick gooogle search on how to install python 3 for windows will provide 
 the information you need.
+	> To check if you have python installed, go to your windows terminal and type:
+		python 
+	> This should open python. If nothing or error is invoked, you will need to install python 3. 
 
 * The following modules are required to run:
 
@@ -15,6 +18,7 @@ the information you need.
 	- pandas
 	- os 
 	- platform 
+	- time 
 
  > If they are not installed, they can be installed via the following command in 
  your windows terminal:
@@ -24,7 +28,7 @@ the information you need.
  > If you do not have pip installed, proceed to the following link to donwload pip:
 	  * https://phoenixnap.com/kb/install-pip-windows
 
-* There are two scripts required to produce the output: 
+* There are two scripts required to produce the .csv files with configuration information: 
 	- automation4LISE.py 
 	- auto4LISE.py 
 	
@@ -34,6 +38,8 @@ the information you need.
 	auto4LISE.py 
 	------------
 		> This is the script that calls the implementation module; the "interface".
+		
+* Once you have the moduled installed, python 3 installed, and 
 
 DATA STORAGE 
 ------------
@@ -67,4 +73,6 @@ later adjusted downstream to yield optimal purity results without large comprimi
 > For isotopes Mg 38 and Mg 40, there are 2-3 LISE++ files for each isotope. Each file is a 
 different compromise on purity and intensity for the corresponding isotope. The intensities 
 that are used in the UPDATE presentation are from Mg_40_FRIB_3 and Mg_38_FRIB_3. 
+
+> As of now, an update is ensuing that will work with Linux machines (Mac OS, for example). This will be updated when that is completed. 
  
