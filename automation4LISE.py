@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import csv
 import os 
+import platform 
 
 """
 Roy Salinas
@@ -19,10 +20,25 @@ All beam data comes from NSCL website: https://nscl.msu.edu/users/beams.html
 
 Python version: 3.7.1 
 
+Currently, this is set up to only works with a Windows OS.
+
 """
 
 #path = os.path.expanduser("~\Desktop")
 #print(path)
+
+#check what system you are using
+useros = platform.system()
+if useros == "Linux":
+	print("Using a Linux OS...")
+	desktop = os.path.expanduser("~/Desktop")
+	print(f"Your desktop path is: {desktop}")
+elif useros == "Windows":
+	print("Using a Windows OS...")
+	home = os.path.expanduser('~') #find your home directory 
+	desktop = home + "\Desktop"
+	print(f"Your desktop path is {desktop}")
+
 
 pag.PAUSE=1
 pag.FAILSAFE=True
@@ -373,20 +389,27 @@ def get_intensity(isotope,beam_element,beam_mass):
 	pag.click(button="right")
 	pag.moveTo(1483,417) #File save button 
 	pag.click()
+
+	"""
 	pag.moveTo(532,121) #drop down 
 	pag.click()
 	#pag.press("d",presses=2,interval=1) #to save in desktop
 	pag.press("d",interval=1) #to save in desktop
 	pag.press("enter")
+	"""
 	pag.moveTo(531,339) #file save text box
 	pag.click()
-	pag.write("junk.txt")
+	filename = str(desktop) + "\data.txt" #desktop comes from top of the sript.
+	print(f"The file is being saved at the following location: {filename}")
+	pag.write(filename)
+	#pag.write("junk.txt")
 	pag.press("enter")
 	pag.press("left")
 	pag.press("enter") #this "enter" saves the file to desktop
 	pag.moveTo(1563,44)
 	pag.click()
-	df = pd.read_csv("C:\\Users\Owner\Desktop\junk.txt") #path to temporary file. NEED TO UPDATE 
+	df = pd.read_csv(filename)
+	#df = pd.read_csv("C:\\Users\Owner\Desktop\junk.txt") #path to temporary file. NEED TO UPDATE 
 	#print(df)
 	intensity_check=df.iloc[0,0]  #location of the intensity in the data frame. Usually included an extra line if it is zero
 	intensity_check = intensity_check.split()
@@ -406,7 +429,8 @@ def get_intensity(isotope,beam_element,beam_mass):
 def FP_slit_X_transmission_percent():
 	#NEED TO WORK ON THIS
 	print("Getting FP_Slits X space transmission...")
-	df = pd.read_csv("C:\\Users\Owner\Desktop\junk.txt")
+	filename = str(desktop) + "\data.txt" #desktop comes from top of the sript.
+	df = pd.read_csv(filename)
 	FP_x_space_transmission = df.iloc[39,0] #location in the .csv file
 	FP_x_space_transmission = FP_x_space_transmission.split()
 	#print(FP_x_space_transmission[4])
@@ -414,7 +438,7 @@ def FP_slit_X_transmission_percent():
 
 def purity_percent(fragment_isotope):
 	print(f"Retrieving beam purity for {fragment_isotope}...")
-	pag.moveTo(832,83)
+	pag.moveTo(832,83) #run all nucleo buttom (red lightning bolt)
 	pag.click()
 	time.sleep(40)
 	pag.moveTo(999,77) #x spatial distribution 
@@ -426,16 +450,23 @@ def purity_percent(fragment_isotope):
 	pag.click()
 	pag.press("enter") #accept
 	time.sleep(1)
-	pag.moveTo(1609,201) #file save
+	pag.moveTo(1609,201) #file save button
 	pag.click()
+	"""
 	pag.moveTo(365,195) #drop down 
 	pag.click()
 	#pag.press("d",presses=2,interval=1) #to save in desktop
 	pag.press("d",interval=1) #to save in desktop
 	pag.press("enter")
+	"""
 	pag.moveTo(389,413) #file save text box
 	pag.click()
-	pag.write("pps_junk.txt")
+
+	filename = str(desktop) + "\pps_data.txt" #desktop comes from top of the sript.
+	print(f"The file is being saved at the following location: {filename}")
+	pag.write(filename)
+
+	#pag.write("pps_junk.txt")
 	pag.press("enter") #save file
 	pag.press("left")
 	pag.press("enter") #this "enter" saves the file to desktop
@@ -443,7 +474,8 @@ def purity_percent(fragment_isotope):
 	pag.click()
 	pag.moveTo(1877,13)
 	pag.click()
-	df = pd.read_csv("C:\\Users\Owner\Desktop\pps_junk.txt",error_bad_lines=False) #path to temporary file. NEED TO UPDATE
+	df = pd.read_csv(filename,error_bad_lines=False)
+	#df = pd.read_csv("C:\\Users\Owner\Desktop\pps_junk.txt",error_bad_lines=False) #path to temporary file. NEED TO UPDATE
 	print(f"Size of data frame is {df.size}.")
 	_string = df.iloc[5,0] #get the pps for isotope in question
 	_string = _string.split()
