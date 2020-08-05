@@ -1,10 +1,11 @@
 INFORMATION ABOUT RUNNING SCRIPT:
 ----------------------------------
 
-* Currently, only set up to work on Windows OS
+* Currently, only set up to work on Windows OS.
 
 * The automation scripts were written in python 3. If you do not have python 3 installed, you will need to install it as
-certain functions are only available in python 3.
+certain functions are only available in python 3. A quick gooogle search on how to install python 3 for windows will provide 
+the information you need.
 
 * The following modules are required to run:
 
@@ -15,11 +16,13 @@ certain functions are only available in python 3.
 	- os 
 	- platform 
 
- If they are not installed, they can be installed via the following command in 
+ > If they are not installed, they can be installed via the following command in 
  your windows terminal:
- 	  > pip install MODULE (ex. pip install pyautogui)
- If that does not work, try the following:
- 	  > py -m pip install MODULE 
+ 	  * pip install MODULE (ex. pip install pyautogui)
+ > If that does not work, try the following:
+ 	  * py -m pip install MODULE 
+ > If you do not have pip installed, proceed to the following link to donwload pip:
+	  * https://phoenixnap.com/kb/install-pip-windows
 
 * There are two scripts required to produce the output: 
 	- automation4LISE.py 
@@ -30,11 +33,17 @@ certain functions are only available in python 3.
 		> This is the implementation module with all of the functions implemented. 
 	auto4LISE.py 
 	------------
-		> This is the script that calls the implementation module.
+		> This is the script that calls the implementation module; the "interface".
 
-* The data is saved in individual .csv files for each corresponding Magnesium isotope. It is then required from there
-that the user visually inspects the .csv files to find best compromise between intensity and purity.
+DATA STORAGE 
+------------
 
+* The data is saved in individual .csv files for each corresponding Magnesium isotope in the same folder the scripts are in.
+ It is then required from there that the user visually inspects the .csv files to find best compromise between intensity and purity.
+
+* The intermediate files "data.txt" and "pps_data.txt" are files that are created with the sole purpose of being reused. They are 
+created when the script is originally executed and keeps being updated corresponding to each isotope. It is safe to delete these 
+two files once you are done with the program. 
 
 GENERAL INFORMATION
 -------------------
