@@ -1,3 +1,44 @@
+INFORMATION ABOUT RUNNING SCRIPT:
+----------------------------------
+
+* Currently, only set up to work on Windows OS
+
+* The automation scripts were written in python 3. If you do not have python 3 installed, you will need to install it as
+certain functions are only available in python 3.
+
+* The following modules are required to run:
+
+	- pyautogui 
+	- matplotlib 
+	- pyperclib 
+	- pandas
+	- os 
+	- platform 
+
+ If they are not installed, they can be installed via the following command in 
+ your windows terminal:
+ 	  > pip install MODULE (ex. pip install pyautogui)
+ If that does not work, try the following:
+ 	  > py -m pip install MODULE 
+
+* There are two scripts required to produce the output: 
+	- automation4LISE.py 
+	- auto4LISE.py 
+	
+	automation4LISE.py
+	------------------
+		> This is the implementation module with all of the functions implemented. 
+	auto4LISE.py 
+	------------
+		> This is the script that calls the implementation module.
+
+* The data is saved in individual .csv files for each corresponding Magnesium isotope. It is then required from there
+that the user visually inspects the .csv files to find best compromise between intensity and purity.
+
+
+GENERAL INFORMATION
+-------------------
+
 > This folder contains preliminary LISE++ files for optimal configurations using NSCL and FRIB facilities
 to study isotopes Mg 32 through Mg 40. 
 
@@ -6,9 +47,7 @@ plane (O4_PS_FP), respectively.
 
 > To allow for largest intenisty possible on the FRIB LISE++ configuration, the pre-separator 
 slits (PS_Wedge_Slits) are set to the aperture limit, 135 mm. Wedges and momentum acceptances were 
-later adjusted downstream to yield optimal purity results without large comprimise to intensity. 
-Beware to user, the momentum acceptance changes downstream and requires one to keep this in 
-mind. 
+later adjusted downstream to yield optimal purity results without large comprimise to intensity.
 
 > All NSCL files have FP_Slits set to 10 mm and have purity greater than 91%.
 
